@@ -33,7 +33,7 @@ List the database write and update requests the application requires using plain
 
 6. ADMINISTRATOR initializes timetables:
 
-    6.1 Create a table for timetables. Table name: `time_table`. Columns: `line_name` (unique, if not exists, string), `service_no` (number, asc within line_name), `details` (map type: station_name, time, distance)
+    6.1 Create a table for timetables. Table name: `time_table`. Columns: `line_name` (unique, if not exists, string), `service_no` (number, asc within line_name), `sequence` (map type: station_name, time, distance) Notes: time are departure times, except the last (destination) time, it is arrival time. `sequence` sorted `asc` by `time`.
 
 ## Question 2.
 List the read requests the application requires using plain English. [12 marks]
