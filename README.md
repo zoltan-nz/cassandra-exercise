@@ -5,7 +5,7 @@
 # Assignment Questions
 
 ## Question 1.
-List the database write and update requests the application requires using plain English. [10 marks]
+*List the database write and update requests the application requires using plain English. [10 marks]*
 
 1. Administrator creates a keyspace for the application. Keyspace name: `tranz_metro`.
 
@@ -23,9 +23,11 @@ List the database write and update requests the application requires using plain
 
     3.3 Drivers can add new skill to `skill` column. Skill column type is `SET<string>`.
 
+    3.4 App updates a counter log table for payrol. See Question 2, Read 1.
+
 4. Administrator initializes vehicles:
 
-    4.1 Create a table for vehicles. Table name: `vehicles`. Columns: `vehicle_id` (uuid, unique, if not exists), `status` (string), type (string)
+    4.1 Create a table for vehicles. Table name: `vehicle`. Columns: `vehicle_id` (uuid, unique, if not exists), `status` (string), type (string)
 
     4.2 Seed the initial vehicles data.
 
@@ -53,10 +55,12 @@ List the database write and update requests the application requires using plain
 
     8.2 The app creates a new log entry in this table in every 10 seconds, when the vehicle's engine is on.
 
-## Question 2.
-List the read requests the application requires using plain English. [12 marks]
+9. Administrator create a neighbour reference table and seed with initial data. Table name: `station`, Columns: `name` (string), `latitude` (double), `north_neighbour` (string), `south_neighbour` (string)
 
-1. Read the number of working days of a driver. (Payroll will use this information.)
+## Question 2.
+*List the read requests the application requires using plain English. [12 marks]*
+
+1. Read the number of working days of a driver. (Payroll will use this information.). App collects this information in a separate table. Table name: `driver_working_days`, Columns: `driver_name` (unique, string), `working_day` (counter). This is a counter table and the app will update the counter, when the driver starts to work.
 
 2. Read timetable data for showing timetable for passengers. Requested columns from `time_table` table: `line_name`, `station_name`, `time`.
 
@@ -76,22 +80,66 @@ List the read requests the application requires using plain English. [12 marks]
 
     8.2 List of entries by service (`line_name` and `service_no`) in a time interval (`start_time`, `end_time`). List all the entries, where `sequence` between the given time intervals.
 
-    8.3 Read one log entry and find the closest `north_neighbour` and `south_neighbour`.
+9. Reading from `station` table:
+
+    9.1 Read one log entry and find the closest `north_neighbour` and `south_neighbour`.
 
 
 ## Question 3.
-Consider Cassandra data model design guidelines we discussed in lectures and list names of database tables the application requires using plain English. Recall, Cassandra tables strongly depend on requested queries. If there is no queries needing a table, the table should not exist. (Don’t invent queries to justify the existence of any tables.) After each table name, list those queries you identified in your answer to question 2 that use the table.
-[9 marks]
+*Consider Cassandra data model design guidelines we discussed in lectures and list names of database tables the application requires using plain English. Recall, Cassandra tables strongly depend on requested queries. If there is no queries needing a table, the table should not exist. (Don’t invent queries to justify the existence of any tables.) After each table name, list those queries you identified in your answer to question 2 that use the table.
+[9 marks]*
+
+**Tables**.:
+
+1. `driver` => Question 1 Update 2.1, 2.2, 3.1, 3.2, 3.3; Question 2 Read 5, 6;
+2. `vehicle` => Question 1, Update 4.1, 4.2, 5.1, 5.2, 5.3, Question 2, Read 4.
+3. `time_table` => Question 1, Update 6.1; Question 2, Read 2., 3., 7.
+4. `vehicle_usage` => Question 1, Update 7.1
+5. `data_point` => Question 1, Update 8.1, Question 2., Read 8.1, 8.2
+6. `station` => Question 1, Update 9; Question 2, Read 9.1;
+7. `driver_working_days` => Question 2, Read 1.
 
 ## Question 4.
-A/ Create data model using CQL 3 statements that support the requirements. To answer questions, use Cassandra CCM. In your answers, copy your CCM and CQL commands.
-[20 marks]
+*Create data model using CQL 3 statements that support the requirements. To answer questions, use Cassandra CCM. In your answers, copy your CCM and CQL commands.
+[20 marks]*
 
-B/ Create a cluster and a keyspace that will satisfy infrastructure and availability requirements above.
-[5 marks]
+*A/ Create a cluster and a keyspace that will satisfy infrastructure and availability requirements above.
+[5 marks]*
 
-C/ Define tables listed in your answer to question 3 above. For the table definitions include any non default property settings. Optimize your database solution just for iPhone application queries you identified in question 2 above.
-[15 marks]
+*Create cluster with 6 node, using Cassandra v3.10 with `ccm`*
+
+Run the following command in terminal.
+
+```shell
+$ ccm create tranz-cluster -v 3.10 -n 6
+```
+
+*Create keyspace*
+
+Switch to the created cluster and launch it:
+
+```shell
+$ ccm switch tranz-cluster
+$ ccm start
+```
+
+Run `cqlsh` on `node1`:
+
+```
+$ ccm node1 cqlsh
+```
+
+Create the keyspace using `cql`:
+
+```cql
+CREATE KEYSPACE If NOT EXISTS tranz with replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 6};
+USE tranz;
+```
+
+*B/ Define tables listed in your answer to question 3 above. For the table definitions include any non default property settings. Optimize your database solution just for iPhone application queries you identified in question 2 above.
+[15 marks]*
+
+
 
 ## Question 5.
 Provide CQL3 statements to support each of the application write and update requests you specified in Question 1 above. Show the consistency level before each write and update statement.
