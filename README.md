@@ -27,7 +27,7 @@
 
 4. Administrator initializes vehicles:
 
-    4.1 Create a table for vehicles. Table name: `vehicle`. Columns: `vehicle_id` (uuid, unique, if not exists), `status` (string), type (string)
+    4.1 Create a table for vehicles. Table name: `vehicle`. Columns: `vehicle_id` (string, unique, if not exists), `status` (string), type (string)
 
     4.2 Seed the initial vehicles data.
 
@@ -45,7 +45,7 @@
 
 7. Recording the travelled distance of a vehicle.
 
-    7.1 Need a `vehicle_usage` table for logging vehicle usage. Administrator can create this table with the following columns: `vehicle_id`, `date`, `travelled_distance`, `total_distance`.
+    7.1 Need a `vehicle_usage` table for logging vehicle usage. Administrator can create this table with the following columns: `vehicle_id`, `date`, `total_distance` (counter).
 
     7.2 This log will run after the app updated the vehicle `status`. See Question 1, Update 5.3. Distance information comes from Question 2, Read 7.
 
