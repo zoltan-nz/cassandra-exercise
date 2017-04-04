@@ -2,6 +2,8 @@
 
 Zoltan Debre - 300360191
 
+Original source code and git log: https://github.com/zoltan-nz/cassandra-exercise
+
 ## Run everything with the following source command in cqlsh
 
 ```sql
