@@ -11,7 +11,7 @@
 
 2. Administrator creates accounts for drivers:
 
-    2.1 Create a table for drivers if not exists. Table name: `driver`. Columns: `driver_name` (unique, if not exists), `password` (string), `mobile` (number), `current_position` (string), `skill` (`set` type with strings).
+    2.1 Create a table for drivers if not exists. Table name: `driver`. Columns: `driver_name` (unique, if not exists, primary key), `password` (string), `mobile` (number), `current_position` (string), `skill` (`set` type with strings).
 
     2.2 Seed the initial drivers data.
 
@@ -43,6 +43,8 @@
 
     6.1 Create a table for timetables. Table name: `time_table`. Columns: `line_name` (unique, if not exists, string), `service_no` (number, asc within line_name), `station_name` (string), `latitude` (double), `longitude` (double), `time` (int), `distance` (double),  Notes: time are departure times, except the last (destination) time, it is arrival time. Sorted `asc` by `time`.
 
+    6.2 Seed `time_table`.
+
 7. Recording the travelled distance of a vehicle.
 
     7.1 Need a `vehicle_usage` table for logging vehicle usage. Administrator can create this table with the following columns: `vehicle_id`, `date`, `total_distance` (counter).
@@ -51,10 +53,11 @@
 
 8. Recording data points after the vehicle's engine started.
 
-    8.1 Administrator create a table. Table name: `data_point`. Columns: `day` (int), `sequence` (timestamp), `latitude` (double), `longitude` (double), `speed` (double), `line_name`, `service_no`
+    8.1 Administrator create a table. Table name: `data_point`. Columns: `day` (int), `sequence` (timestamp), `latitude` (double), `longitude` (double), `speed` (double).
 
     8.2 The app creates a new log entry in this table in every 10 seconds, when the vehicle's engine is on.
 
+REVIEW THIS:
 9. Administrator create a neighbour reference table and seed with initial data. Table name: `station`, Columns: `name` (string), `latitude` (double), `north_neighbour` (string), `south_neighbour` (string)
 
 ## Question 2.
@@ -80,6 +83,7 @@
 
     8.2 List of entries by service (`line_name` and `service_no`) in a time interval (`start_time`, `end_time`). List all the entries, where `sequence` between the given time intervals.
 
+REVIEW THIS!!:
 9. Reading from `station` table:
 
     9.1 Read one log entry and find the closest `north_neighbour` and `south_neighbour`.
@@ -139,11 +143,9 @@ USE tranz;
 *B/ Define tables listed in your answer to question 3 above. For the table definitions include any non default property settings. Optimize your database solution just for iPhone application queries you identified in question 2 above.
 [15 marks]*
 
-
-
 ## Question 5.
-Provide CQL3 statements to support each of the application write and update requests you specified in Question 1 above. Show the consistency level before each write and update statement.
-[20 marks]
+*Provide CQL3 statements to support each of the application write and update requests you specified in Question 1 above. Show the consistency level before each write and update statement.
+[20 marks]*
 
 ## Question 6.
 Provide CQL3 statements to support each of the application read requests you specified in Question 2 above. Show the consistency level before each read statement. In your answer copy your CQL statement and the result produced by Cassandra from the screen.
