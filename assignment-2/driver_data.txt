@@ -1,0 +1,6 @@
+fred,Taita,fred@ecs.vuw.ac.nz,2799797,f00f,"{'Ganz Mavag', 'Guliver'}"
+jane,Waikanae,jane@ecs.vuw.ac.nz,2131131,jj77,{'Matangi'}
+milan,Upper Hutt,milan@ecs.vuw.ac.nz,211111,mm77,{'Matangi'}
+ann,not available,ann@ecs.vuw.ac.nz,21998877,aaaa,{'Matangi'}
+pondy,Wellington,pondy@ecs.vuw.ac.nz,214455,pd66,"{'Guliver', 'Matangi'}"
+pavle,Upper Hutt,pmogin@ecs.vuw.ac.nz,213344,pm33,"{'Ganz Mavag', 'Guliver', 'Matangi'}"

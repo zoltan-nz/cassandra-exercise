@@ -1,0 +1,30 @@
+Hutt Valley Line,2,1045,34.3,-41.2865,174.7762,Wellington
+Hutt Valley Line,2,1033,26,-41.227,174.8851,Petone
+Hutt Valley Line,2,1025,21,-41.2092,174.9081,Waterloo
+Hutt Valley Line,2,1015,15.3,-41.1798,174.9608,Taita
+Hutt Valley Line,2,1000,0,-41.1244,175.0708,Upper Hutt
+Melling,3,807,13.7,-41.2036,174.9054,Melling
+Melling,3,801,11.4,-41.2118,174.89,Western Hutt
+Melling,3,754,8.3,-41.227,174.8851,Petone
+Melling,3,741,0,-41.2865,174.7762,Wellington
+Hutt Valley Line,1,650,34.3,-41.1244,175.0708,Upper Hutt
+Hutt Valley Line,1,642,26.5,-41.1479,175.0122,Silverstream
+Hutt Valley Line,1,634,19,-41.1798,174.9608,Taita
+Hutt Valley Line,1,629,15.8,-41.2024,174.9423,Naenae
+Hutt Valley Line,1,625,13.3,-41.2092,174.9081,Waterloo
+Hutt Valley Line,1,622,11,-41.2204,174.9081,Woburn
+Hutt Valley Line,1,617,8.3,-41.227,174.8851,Petone
+Hutt Valley Line,1,605,0,-41.2865,174.7762,Wellington
+Waikanae,5,1139,62.8,-40.8755,175.0668,Waikanae
+Waikanae,5,1118,51.3,-40.9142,175.0084,Paraparaumu
+Waikanae,5,1059,33.1,-40.9881,174.951,Paekakariki
+Waikanae,5,1042,15.9,-41.1339,174.8406,Porirua
+Waikanae,5,1025,0,-41.2865,174.7762,Wellington
+Hutt Valley Line,11,2025,34.3,-41.1244,175.0708,Upper Hutt
+Hutt Valley Line,11,2019,26.5,-41.1479,175.0122,Silverstream
+Hutt Valley Line,11,2010,19,-41.1798,174.9608,Taita
+Hutt Valley Line,11,2001,15.8,-41.2024,174.9423,Naenae
+Hutt Valley Line,11,1955,13.3,-41.2092,174.9081,Waterloo
+Hutt Valley Line,11,1952,11,-41.2204,174.9081,Woburn
+Hutt Valley Line,11,1947,8.3,-41.227,174.8851,Petone
+Hutt Valley Line,11,1935,0,-41.2865,174.7762,Wellington

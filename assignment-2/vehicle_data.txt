@@ -1,0 +1,6 @@
+KW3300,Wellington,Matangi
+FA3456,in_use,Matangi
+FP8899,Upper Hutt,Matangi
+FP3003,out of order,Guliver
+FA4864,maintenance,Matangi
+FA1122,Upper Hutt,Ganz Mavag
