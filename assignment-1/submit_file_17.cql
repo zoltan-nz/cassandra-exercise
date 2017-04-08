@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS tranz.driver_working_days;
 -- ANSWERS FOR QUESTION 4
 
 -- 1. Administrator creates a keyspace for the application. Keyspace name: `tranz_metro`.
-CREATE KEYSPACE If NOT EXISTS tranz with replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 6};
+CREATE KEYSPACE IF NOT EXISTS tranz with replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 6};
 USE tranz;
 
 -- 2.1 Create a table for drivers if not exists. Table name: `driver`. Columns: `driver_name` (unique, if not exists, primary key), `password` (string), `mobile` (number), `current_position` (string), `skill` (`set` type with strings).

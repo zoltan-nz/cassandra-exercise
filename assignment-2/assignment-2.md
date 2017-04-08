@@ -183,3 +183,170 @@ default=DC1:r1
 
 Because of using a single data center (Simple Snitch) we don't see any relation between this file and our `ccm node1 ring` output. Simple Snitch doesn't recognize data center or rack information.
 
+## Question 4. 
+
+(8 marks)
+
+a) (3marks) Connect to `cqlsh` prompt and create a keyspace with the name `ass2`. Replication strategy should be `simple`, and the replication factor equal `3`. In your answer, show your keyspace declaration.
+
+```
+$ ccm node1 cqlsh
+cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+```
+
+b) (5marks) 
+
+The following files:
+   
+   ```
+   table_declarations.cql
+   data_point_data.txt
+   driver_data_txt
+   time_table_data.txt
+   vehicle_data.txt
+   ```
+   
+are given on the course Assignments page. The file `table_declarations.cql` contains create table statements, while the other files contain comma separated table data. Use these files, and `SOURCE` and `COPY` cqlsh commands to implement a version of the train time table data base. In your answer show the results of running the cqlsh command `describe tables` and of running `select` statements on each table for a row of your choice.
+
+```
+$ ccm node1 cqlsh
+cqlsh> SOURCE './table_declarations.cql'
+cqlsh> DESCRIBE TABLES;
+
+Keyspace system_schema
+----------------------
+tables     triggers    views    keyspaces  dropped_columns
+functions  aggregates  indexes  types      columns
+
+Keyspace system_auth
+--------------------
+resource_role_permissons_index  role_permissions  role_members  roles
+
+Keyspace system
+---------------
+available_ranges          peers               batchlog        transferred_ranges
+batches                   compaction_history  size_estimates  hints
+prepared_statements       sstable_activity    built_views
+"IndexInfo"               peer_events         range_xfers
+views_builds_in_progress  paxos               local
+
+Keyspace system_distributed
+---------------------------
+repair_history  view_build_status  parent_repair_history
+
+Keyspace system_traces
+----------------------
+events  sessions
+
+Keyspace ass2
+-------------
+time_table  data_point  driver  vehicle
+```
+
+```
+cqlsh> COPY ass2.time_table (line_name, service_no, time, distance, latitude, longitude, stop) FROM './time_table_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, longitude, stop].
+Processed: 30 rows; Rate:      44 rows/s; Avg. rate:      66 rows/s
+30 rows imported from 1 files in 0.458 seconds (0 skipped).
+cqlsh> SELECT * FROM ass2.time_table;
+
+ line_name        | service_no | time | distance | latitude | longitude | stop
+------------------+------------+------+----------+----------+-----------+--------------
+          Melling |          3 |  807 |     13.7 | -41.2036 |  174.9054 |      Melling
+          Melling |          3 |  801 |     11.4 | -41.2118 |    174.89 | Western Hutt
+          Melling |          3 |  754 |      8.3 |  -41.227 |  174.8851 |       Petone
+          Melling |          3 |  741 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          1 |  650 |     34.3 | -41.1244 |  175.0708 |   Upper Hutt
+ Hutt Valley Line |          1 |  642 |     26.5 | -41.1479 |  175.0122 | Silverstream
+ Hutt Valley Line |          1 |  634 |       19 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |          1 |  629 |     15.8 | -41.2024 |  174.9423 |       Naenae
+ Hutt Valley Line |          1 |  625 |     13.3 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |          1 |  622 |       11 | -41.2204 |  174.9081 |       Woburn
+ Hutt Valley Line |          1 |  617 |      8.3 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |          1 |  605 |        0 | -41.2865 |  174.7762 |   Wellington
+         Waikanae |          5 | 1139 |     62.8 | -40.8755 |  175.0668 |     Waikanae
+         Waikanae |          5 | 1118 |     51.3 | -40.9142 |  175.0084 |  Paraparaumu
+         Waikanae |          5 | 1059 |     33.1 | -40.9881 |   174.951 |  Paekakariki
+         Waikanae |          5 | 1042 |     15.9 | -41.1339 |  174.8406 |      Porirua
+         Waikanae |          5 | 1025 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |         11 | 2025 |     34.3 | -41.1244 |  175.0708 |   Upper Hutt
+ Hutt Valley Line |         11 | 2019 |     26.5 | -41.1479 |  175.0122 | Silverstream
+ Hutt Valley Line |         11 | 2010 |       19 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |         11 | 2001 |     15.8 | -41.2024 |  174.9423 |       Naenae
+ Hutt Valley Line |         11 | 1955 |     13.3 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |         11 | 1952 |       11 | -41.2204 |  174.9081 |       Woburn
+ Hutt Valley Line |         11 | 1947 |      8.3 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |         11 | 1935 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          2 | 1045 |     34.3 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          2 | 1033 |       26 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |          2 | 1025 |       21 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |          2 | 1015 |     15.3 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |          2 | 1000 |        0 | -41.1244 |  175.0708 |   Upper Hutt
+
+(30 rows)
+```
+
+```
+cqlsh> COPY ass2.data_point FROM './data_point_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.data_point with columns [line_name, service_no, date, sequence, latitude, longitude, speed].
+Processed: 5 rows; Rate:       8 rows/s; Avg. rate:      11 rows/s
+5 rows imported from 1 files in 0.437 seconds (0 skipped).
+cqlsh> SELECT * FROM ass2.data_point;
+
+ line_name       | service_no | date     | sequence                        | latitude | longitude | speed
+-----------------+------------+----------+---------------------------------+----------+-----------+-------
+ Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:07:40.000000+0000 | -41.2012 |       175 |  70.1
+ Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:02:10.000000+0000 | -41.1255 |    175.07 |  40.5
+ Hutt Valey Line |          2 | 20160326 | 2016-03-24 21:27:10.000000+0000 | -41.2262 |    174.77 |  29.1
+ Hutt Valey Line |          2 | 20150322 | 2015-03-21 21:44:10.000000+0000 | -41.2862 |  174.7759 |   9.1
+ Hutt Valey Line |          2 | 20160322 | 2016-03-21 21:37:50.000000+0000 | -41.2272 |    174.77 |  29.1
+
+(5 rows)
+```
+
+```
+cqlsh> COPY ass2.driver FROM './driver_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, password, skill].
+Processed: 6 rows; Rate:      10 rows/s; Avg. rate:      14 rows/s
+6 rows imported from 1 files in 0.430 seconds (0 skipped).
+cqlsh> SELECT * FROM ass2.driver;
+
+ driver_name | current_position | email                | mobile   | password | skill
+-------------+------------------+----------------------+----------+----------+--------------------------------------
+        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f |            {'Ganz Mavag', 'Guliver'}
+        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 |                          {'Matangi'}
+         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa |                          {'Matangi'}
+       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 |                          {'Matangi'}
+       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 |               {'Guliver', 'Matangi'}
+       pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz |   213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
+
+(6 rows)
+```
+
+```
+cqlsh> COPY ass2.vehicle FROM './vehicle_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.vehicle with columns [vehicle_id, status, type].
+Processed: 6 rows; Rate:      10 rows/s; Avg. rate:      14 rows/s
+6 rows imported from 1 files in 0.433 seconds (0 skipped).
+cqlsh> SELECT * FROM ass2.vehicle;
+
+ vehicle_id | status       | type
+------------+--------------+------------
+     KW3300 |   Wellington |    Matangi
+     FP3003 | out of order |    Guliver
+     FA3456 |       in_use |    Matangi
+     FP8899 |   Upper Hutt |    Matangi
+     FA4864 |  maintenance |    Matangi
+     FA1122 |   Upper Hutt | Ganz Mavag
+
+(6 rows)
+```
+
