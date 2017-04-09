@@ -350,3 +350,29 @@ cqlsh> SELECT * FROM ass2.vehicle;
 (6 rows)
 ```
 
+## Question 5. 
+(10 marks) To answer this question, you will need to use the `getendpoints nodetool` command.
+
+a) (1 mark) Find the nodes storing data of driver pavle. In your answer, show the output of the getendpoints nodetool command. Let us call these nodes node_a, node_b, and node_c.
+
+```
+$ ccm node1 nodetool getendpoints ass2 driver pavle
+
+127.0.0.1
+127.0.0.2
+127.0.0.3
+```
+
+b) (3 marks) 
+
+Connect to cqlsh prompt using a node that is not in the set {node_a, node_b, node_c}. 
+
+Set the consistency level to ALL and read data of the driver pavle. 
+
+Stop node_a, connect to cqlsh, set the consistency level to ALL and read pavle’s data again. What have you learned?
+
+
+
+c) (3 marks) With node_a still being stopped, set the consistency level to QOURUM and read pavle’s data. Stop node_b, connect to cqlsh, set the consistency level to QUORUM and read pavle’s data again. What have you learned
+
+d) (3 marks) With node_a and node_b still being stopped, set the consistency level to ONE and read pavle’s data. Stop node_c, connect to cqlsh, and read pavle’s data again. What have you learned
