@@ -353,7 +353,7 @@ cqlsh> SELECT * FROM ass2.vehicle;
 ## Question 5. 
 (10 marks) To answer this question, you will need to use the `getendpoints nodetool` command.
 
-a) (1 mark) Find the nodes storing data of driver pavle. In your answer, show the output of the getendpoints nodetool command. Let us call these nodes node_a, node_b, and node_c.
+a) (1 mark) Find the nodes storing data of driver `pavle`. In your answer, show the output of the getendpoints nodetool command. Let us call these nodes `node_a`, `node_b`, and `node_c`.
 
 ```
 $ ccm node1 nodetool getendpoints ass2 driver pavle
@@ -365,14 +365,97 @@ $ ccm node1 nodetool getendpoints ass2 driver pavle
 
 b) (3 marks) 
 
-Connect to cqlsh prompt using a node that is not in the set {node_a, node_b, node_c}. 
+Connect to `cqlsh` prompt using a node that is not in the set `{node_a, node_b, node_c}`. 
 
-Set the consistency level to ALL and read data of the driver pavle. 
+```
+$ ccm node4 cqlsh
+```
 
-Stop node_a, connect to cqlsh, set the consistency level to ALL and read pavle’s data again. What have you learned?
+Set the consistency level to ALL and read data of the driver pavle.
+ 
+```
+cqlsh> CONSISTENCY;
+Current consistency level is ONE.
+cqlsh> CONSISTENCY ALL;
+Consistency level set to ALL.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+--------------------------------------
+       pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz | 213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
+
+(1 rows)
+```
+
+Stop `node_a`, connect to cqlsh, set the consistency level to ALL and read pavle’s data again. What have you learned?
+
+```
+$ ccm node1 stop
+$ ccm node4 cqlsh
+cqlsh> CONSISTENCY ALL;
+Consistency level set to ALL.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+NoHostAvailable:
+```
+
+`CONSISTENCY ALL` in Read Consistency Levels means that Cassandra returns the record after all replicas have responded. The read operation will fail if a replica does not respond. Exactly this happened in our case.
+
+c) (3 marks) 
+
+With `node_a` still being stopped, set the consistency level to QOURUM and read pavle’s data.
+
+```
+cqlsh> CONSISTENCY QUORUM ;
+Consistency level set to QUORUM.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+--------------------------------------
+       pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz | 213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
+
+(1 rows)
+```
+
+Stop node_b, connect to cqlsh, set the consistency level to QUORUM and read pavle’s data again. What have you learned
+
+```
+$ ccm node2 stop
+$ ccm node4 cqlsh
+cqlsh> CONSISTENCY QUORUM;
+Consistency level set to QUORUM.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+NoHostAvailable:
+```
+
+The `CONSISTENCY QUORUM` means that Cassandra will return the record after a quorum of replicas from all datacenters has responded. We have one datacenter at this stage, the replaction factor is 3, so at least 2 should respond. We got results when only one node was dead, but no responses when 2 were dead from 3 nodes.
+
+d) (3 marks) 
+
+With node_a and node_b still being stopped, set the consistency level to ONE and read pavle’s data. 
+
+```
+cqlsh> CONSISTENCY ONE ;
+Consistency level set to ONE.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+--------------------------------------
+       pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz | 213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
+
+(1 rows)
+```
+
+Stop node_c, connect to cqlsh, and read pavle’s data again. What have you learned
+
+```
+$ ccm node3 stop
+$ ccm node4 cqlsh
+cqlsh> CONSISTENCY ONE;
+Consistency level set to ONE.
+cqlsh> SELECT * FROM ass2.driver WHERE driver_name='pavle';
+NoHostAvailable:
+```
+
+`CONSISTENCY ONE`: Returns a response from the closest replica, as determined by the snitch. We have one data center and 3 replicas. In the first case we still had one node available, so one replica was still existed. But after stopping node_c does not left any live replica, so no response.
 
 
-
-c) (3 marks) With node_a still being stopped, set the consistency level to QOURUM and read pavle’s data. Stop node_b, connect to cqlsh, set the consistency level to QUORUM and read pavle’s data again. What have you learned
-
-d) (3 marks) With node_a and node_b still being stopped, set the consistency level to ONE and read pavle’s data. Stop node_c, connect to cqlsh, and read pavle’s data again. What have you learned
