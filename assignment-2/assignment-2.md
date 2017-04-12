@@ -459,3 +459,155 @@ NoHostAvailable:
 `CONSISTENCY ONE`: Returns a response from the closest replica, as determined by the snitch. We have one data center and 3 replicas. In the first case we still had one node available, so one replica was still existed. But after stopping node_c does not left any live replica, so no response.
 
 
+## Question 6. 
+(15 marks) 
+
+You are asked to find those nodes of the `single_dc` Cassandra cluster that store replicas of driver `eileen`. Very soon you realized that all `ccm` commands and `nodetool` commands, including `ccm start`, `ccm stop`, `ccm status`, `ccm nodei cqlsh` and so on, work properly except the command `ccm nodei nodetool getendpoints ass2 driver eileen`. Despite that, you have devised a procedure to find the nodes requested. In your answer, describe the procedure and show how you have applied it.
+
+First of all, we don't have driver with `eileen` in our database. We can check it with the following query.
+
+```
+$ ccm start
+$ ccm switch single_dc
+$ ccm status
+
+Cluster: 'single_dc'
+--------------------
+node1: UP
+node3: UP
+node2: UP
+node5: UP
+node4: UP
+
+$ ccm node1 cqlsh -e "use ass2; select * from driver where driver_name = 'eileen';"
+  
+   driver_name | current_position | email | mobile | password | skill
+  -------------+------------------+-------+--------+----------+-------
+  
+  (0 rows)
+
+$ ccm node1 cqlsh -e "INSERT INTO ass2.driver (driver_name, current_position, email, mobile, password, skill) VALUES ('eileen', 'Wellington', 'eileen@ecs.vuw.ac.nz', 555444, 'abcd123', {'Guliver', 'Matangi'}) IF NOT EXISTS;"
+
+ [applied]
+-----------
+      True
+      
+ccm node1 cqlsh -e "use ass2; select * from driver where driver_name = 'eileen';"
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+------------------------
+      eileen |       Wellington | eileen@ecs.vuw.ac.nz | 555444 |  abcd123 | {'Guliver', 'Matangi'}
+
+(1 rows)      
+```
+
+Without using `nodetool`, we can find nodes which stores our record, if we close all other nodes except one. Using `CONSISTENCY ONE`, we get back our record if that node stores our requested data.
+
+The following bash script can help us to iterate through on all nodes and run the query.
+
+```bash
+nodes=('node1' 'node2' 'node3' 'node4' 'node5');
+for node in "${nodes[@]}"; do
+  ccm switch single_dc
+  ccm stop
+  ccm ${node} start
+  echo "Active node: ${node}"
+  ccm status
+  ccm ${node} cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+done
+```
+
+Or we can run manually this one line for each node:
+
+```
+$ ccm switch single_dc; ccm stop; ccm node1 start; ccm status; ccm node1 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+
+Cluster: 'single_dc'
+--------------------
+node1: UP
+node3: DOWN
+node2: DOWN
+node5: DOWN
+node4: DOWN
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+------------------------
+      eileen |       Wellington | eileen@ecs.vuw.ac.nz | 555444 |  abcd123 | {'Guliver', 'Matangi'}
+
+(1 rows)
+
+$ ccm switch single_dc; ccm stop; ccm node2 start; ccm status; ccm node2 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+
+Cluster: 'single_dc'
+--------------------
+node1: DOWN
+node3: DOWN
+node2: UP
+node5: DOWN
+node4: DOWN
+
+Consistency level set to ONE.
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+------------------------
+      eileen |       Wellington | eileen@ecs.vuw.ac.nz | 555444 |  abcd123 | {'Guliver', 'Matangi'}
+
+(1 rows)
+
+$ ccm switch single_dc; ccm stop; ccm node3 start; ccm status; ccm node3 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+
+Cluster: 'single_dc'
+--------------------
+node1: DOWN
+node3: UP
+node2: DOWN
+node5: DOWN
+node4: DOWN
+
+Consistency level set to ONE.
+
+NoHostAvailable:
+
+$ ccm switch single_dc; ccm stop; ccm node4 start; ccm status; ccm node4 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+
+Cluster: 'single_dc'
+--------------------
+node1: DOWN
+node3: DOWN
+node2: DOWN
+node5: DOWN
+node4: UP
+
+Consistency level set to ONE.
+
+NoHostAvailable:
+
+$ ccm switch single_dc; ccm stop; ccm node5 start; ccm status; ccm node5 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+
+Cluster: 'single_dc'
+--------------------
+node1: DOWN
+node3: DOWN
+node2: DOWN
+node5: UP
+node4: DOWN
+
+Consistency level set to ONE.
+
+ driver_name | current_position | email                | mobile | password | skill
+-------------+------------------+----------------------+--------+----------+------------------------
+      eileen |       Wellington | eileen@ecs.vuw.ac.nz | 555444 |  abcd123 | {'Guliver', 'Matangi'}
+
+(1 rows)
+```
+
+We can see, that our record exists on node1, node2 and node5.
+
+We can check this with our restricted command:
+
+```
+$ ccm start; ccm node1 nodetool getendpoints ass2 driver eileen
+127.0.0.5
+127.0.0.1
+127.0.0.2
+```
