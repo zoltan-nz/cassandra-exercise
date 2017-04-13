@@ -503,7 +503,7 @@ ccm node1 cqlsh -e "use ass2; select * from driver where driver_name = 'eileen';
 
 Without using `nodetool`, we can find nodes which stores our record, if we close all other nodes except one. Using `CONSISTENCY ONE`, we get back our record if that node stores our requested data.
 
-The following bash script can help us to iterate through on all nodes and run the query.
+The following bash script can help us to iterate through on all nodes and run the query. (`q6-node-finder.sh`)
 
 ```bash
 nodes=('node1' 'node2' 'node3' 'node4' 'node5');
@@ -611,3 +611,103 @@ $ ccm start; ccm node1 nodetool getendpoints ass2 driver eileen
 127.0.0.1
 127.0.0.2
 ```
+
+## Question 7. 
+(15 marks) 
+
+Assume the following situation:
+
+The data of the driver `james` should be stored on `node4`, `node5`, and `node1`.
+
+A client (say c0) connected to node3 and sent a request to write james’s data.
+
+In the moment of running the statement `insert into driver (driver_name, password) values ('james', '7007');` `node4` was down.
+
+Writing succeeded.
+
+In the next moment `node5` and `node1` went down and the `node4` started.
+
+A client (say c1) connected to `cqlsh` prompt via `node3` and sent the following
+read statement: `select driver_name, password from driver where driver_name = 'james';`
+
+The read result was:
+```
+    driver_name | password |
+   -------------+----------+
+          james |     7007 |
+```          
+
+Repeat the experiment described above. Name and briefly explain Cassandra mechanism that made succeeding of the select statement above possible.
+
+
+We can see where cassandra would like to store our record. Because the primary key in `driver` table is the `driver_name`, we can list our nodes. And it is really the `node1`, `node4` and `node5`.
+```
+$ ccm start
+$ ccm node1 nodetool getendpoints ass2 driver james
+
+127.0.0.4
+127.0.0.5
+127.0.0.1
+
+$ ccm status
+
+Cluster: 'single_dc'
+--------------------
+node1: UP
+node3: UP
+node2: UP
+node5: UP
+node4: UP
+```
+
+Simulate `node4` is down.
+```
+$ ccm node4 stop
+$ ccm status
+Cluster: 'single_dc'
+--------------------
+node1: UP
+node3: UP
+node2: UP
+node5: UP
+node4: DOWN
+```
+
+We may insert our new row with the following command.
+```
+$ ccm node3 cqlsh -e "use ass2; insert into driver (driver_name, password) values ('james', '7007');"
+```
+
+However, if we don't change our consistency level than our experiment will fail. The default consistency level `ONE`. In this case Cassandra will not replicate our record to `node4` when it starts. We have to switch at least to `CONSISTENCY QUORUM`.
+
+We have to use the following command to insert our data.
+
+```
+$ ccm node3 cqlsh -e "use ass2; consistency quorum; insert into driver (driver_name, password) values ('james', '7007');"
+```
+
+Simulate `node1`, `node5` are down and `node4` is back.
+```
+$ ccm node1 stop; ccm node5 stop; ccm node4 start
+$ ccm status
+Cluster: 'single_dc'
+--------------------
+node1: DOWN
+node3: UP
+node2: UP
+node5: DOWN
+node4: UP
+
+$ ccm node3 cqlsh -e "use ass2; select driver_name, password from driver where driver_name='james';"
+
+ driver_name | password
+-------------+----------
+       james |     7007
+
+(1 rows)
+```
+
+When we run our insert command with quorum consistency, Cassandra write our record at least in two nodes, plus it will write in log and in the memtable. When our `node1` and `node5` is stoped and node4 came back, Cassandra inserted our record from memtable in `node4`.
+
+Cassandra uses gossip process to track states of nodes. It helps to determine which node is up or down and when it can replicate a missing data.
+
