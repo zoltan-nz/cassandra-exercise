@@ -149,7 +149,7 @@ Yes, this value is the ip address of the first node
 127.0.0.1  rack1       Up     Normal  98.97 KiB       40.00%              -9223372036854775808
 ```
 
-## Question 3. 
+## Question 3 
 
 (2 marks) Consider the `casssandra.topology.properties` file of `node1` and comment on the relationship between file’s content and the output of the `ccm node1 ring` command.
 
@@ -181,9 +181,9 @@ The main content of the property file:
 default=DC1:r1
 ```
 
-Because of using a single data center (Simple Snitch) we don't see any relation between this file and our `ccm node1 ring` output. Simple Snitch doesn't recognize data center or rack information.
+Because of using a single data center (Simple Snitch) we don't see any relation between this file and our `ccm node1 ring` output. Simple Snitch does not recognize data center or rack information. Our property file content is just dummy data, examples, not related to our node.
 
-## Question 4. 
+## Question 4
 
 (8 marks)
 
@@ -350,7 +350,7 @@ cqlsh> SELECT * FROM ass2.vehicle;
 (6 rows)
 ```
 
-## Question 5. 
+## Question 5 
 (10 marks) To answer this question, you will need to use the `getendpoints nodetool` command.
 
 a) (1 mark) Find the nodes storing data of driver `pavle`. In your answer, show the output of the getendpoints nodetool command. Let us call these nodes `node_a`, `node_b`, and `node_c`.
@@ -459,7 +459,7 @@ NoHostAvailable:
 `CONSISTENCY ONE`: Returns a response from the closest replica, as determined by the snitch. We have one data center and 3 replicas. In the first case we still had one node available, so one replica was still existed. But after stopping node_c does not left any live replica, so no response.
 
 
-## Question 6. 
+## Question 6 
 (15 marks) 
 
 You are asked to find those nodes of the `single_dc` Cassandra cluster that store replicas of driver `eileen`. Very soon you realized that all `ccm` commands and `nodetool` commands, including `ccm start`, `ccm stop`, `ccm status`, `ccm nodei cqlsh` and so on, work properly except the command `ccm nodei nodetool getendpoints ass2 driver eileen`. Despite that, you have devised a procedure to find the nodes requested. In your answer, describe the procedure and show how you have applied it.
@@ -612,7 +612,7 @@ $ ccm start; ccm node1 nodetool getendpoints ass2 driver eileen
 127.0.0.2
 ```
 
-## Question 7. 
+## Question 7 
 (15 marks) 
 
 Assume the following situation:
@@ -711,3 +711,114 @@ When we run our insert command with quorum consistency, Cassandra write our reco
 
 Cassandra uses gossip process to track states of nodes. It helps to determine which node is up or down and when it can replicate a missing data.
 
+## Question 8
+
+Lost...
+
+## Question 9
+
+(3 marks) 
+
+Use ccm to make a Cassandra cluster spanning two datacenters. The cluster name should be `multi_dc`. 
+Cassandra will automatically assign default names `dc1` and `dc2` to datacenters. The cluster `multi_dc` uses 5 nodes in `dc1` and 4 nodes in `dc2`. Start the cluster and run the `ccm ring` command. Save the output of the ring command for future use and show it in the answer to the question.
+
+
+```
+$ ccm create -n 5:4 -s multi_dc
+$ ccm switch multi_dc
+$ ccm start
+$ ccm status
+
+Cluster: 'multi_dc'
+-------------------
+node9: UP
+node8: UP
+node1: UP
+node3: UP
+node2: UP
+node5: UP
+node4: UP
+node7: UP
+node6: UP
+
+$ ccm node1 ring
+
+Datacenter: dc1
+==========
+Address    Rack        Status State   Load            Owns                Token
+                                                                          5534023222112865484
+127.0.0.1  r1          Up     Normal  98.97 KiB       25.00%              -9223372036854775808
+127.0.0.2  r1          Up     Normal  98.96 KiB       20.00%              -5534023222112865485
+127.0.0.3  r1          Up     Normal  98.97 KiB       20.00%              -1844674407370955162
+127.0.0.4  r1          Up     Normal  98.97 KiB       20.00%              1844674407370955161
+127.0.0.5  r1          Up     Normal  98.96 KiB       20.00%              5534023222112865484
+
+Datacenter: dc2
+==========
+Address    Rack        Status State   Load            Owns                Token
+                                                                          4611686018427388004
+127.0.0.6  r1          Up     Normal  98.96 KiB       20.00%              -9223372036854775708
+127.0.0.7  r1          Up     Normal  98.97 KiB       25.00%              -4611686018427387804
+127.0.0.8  r1          Up     Normal  98.94 KiB       25.00%              100
+127.0.0.9  r1          Up     Normal  98.97 KiB       25.00%              4611686018427388004
+```
+
+## Question 10 
+(4 marks) 
+
+Consider the `casssandra.yaml` file of `node1`. What is the setting of the `endpoint_snitch` property? If you find it different to the setting in the case of the `single_dc` cluster, explain briefly why it is different.
+
+(Please find the `cassandra.yaml` in the `multi_dc` folder.)
+
+```
+endpoint_snitch: org.apache.cassandra.locator.PropertyFileSnitch
+```
+
+In case of `single_dc` our `endpoint_snitch` value was `SimpleSnitch`. In case of `multi_dc` Cassandra uses `PropertyFileSnitch` protocol.
+
+The `SimpleSnitch` is used only for single-datacenter deployments. `PropertyFileSnitch` determines the location of nodes by rack and datacenter. It uses the network details located in the `cassandra-topology.properties` file (copied in `multi_dc` folder).
+
+## Question 11
+(4 marks)
+
+Consider the `cassandra.topology.properties` file of `node1` and comment on the relationship between file’s content and the output of the `ccm node1 ring` command.
+
+Content of `cassandra.topology.properties`:
+```
+default=dc1:r1
+127.0.0.1=dc1:r1
+127.0.0.2=dc1:r1
+127.0.0.3=dc1:r1
+127.0.0.4=dc1:r1
+127.0.0.5=dc1:r1
+127.0.0.6=dc2:r1
+127.0.0.7=dc2:r1
+127.0.0.8=dc2:r1
+127.0.0.9=dc2:r1
+```
+
+`cassandra.topology.properties` file contains the same mapping as we can list with `ccm node1 ring`. We see in both cases that we have two data centers and which IP address, which node belongs to `dc1` or to `dc2` datacenter.
+
+Both list the rack numbers also. In our case, we use only one-one rack.
+
+## Question 12
+(2 marks)
+
+Create a keyspace with the name `ass2` having network topology replication strategy and a replication factor of 3 for both `dc1` and `dc2` datacenters. In your answer, show your keyspace declaration.
+
+```
+cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3, 'dc2': 3 };
+```
+
+## Question 13
+(3 marks)
+
+Use `SOURCE` and `COPY` `cqlsh` commands and the following files:
+
+```
+table_declarations.cql
+driver_data_txt
+time_table_data.txt
+```
+
+to implement a version of the train time table data base. You need to populate only driver and time_table tables by data. In your answer show the results of running the cqlsh command describe tables and of running CQL `select` statements on `driver` and `time_table` for a row of your choice.
