@@ -821,4 +821,106 @@ driver_data_txt
 time_table_data.txt
 ```
 
-to implement a version of the train time table data base. You need to populate only driver and time_table tables by data. In your answer show the results of running the cqlsh command describe tables and of running CQL `select` statements on `driver` and `time_table` for a row of your choice.
+to implement a version of the train time table data base. You need to populate only `driver` and `time_table` tables by data. In your answer show the results of running the `cqlsh` command `describe tables` and of running CQL `select` statements on `driver` and `time_table` for a row of your choice.
+
+```
+$ ccm node1 cqlsh -e "use ass2; SOURCE './table_declarations.cql';" 
+$ ccm node1 cqlsh
+cqlsh> DESCRIBE tables;
+
+Keyspace system_schema
+----------------------
+tables     triggers    views    keyspaces  dropped_columns
+functions  aggregates  indexes  types      columns
+
+Keyspace system_auth
+--------------------
+resource_role_permissons_index  role_permissions  role_members  roles
+
+Keyspace system
+---------------
+available_ranges          peers               batchlog        transferred_ranges
+batches                   compaction_history  size_estimates  hints
+prepared_statements       sstable_activity    built_views
+"IndexInfo"               peer_events         range_xfers
+views_builds_in_progress  paxos               local
+
+Keyspace system_distributed
+---------------------------
+repair_history  view_build_status  parent_repair_history
+
+Keyspace system_traces
+----------------------
+events  sessions
+
+Keyspace ass2
+-------------
+time_table  data_point  driver  vehicle
+```
+
+```
+cqlsh> USE ass2;
+cqlsh:ass2> COPY driver FROM './driver_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, password, skill].
+Processed: 6 rows; Rate:       6 rows/s; Avg. rate:       9 rows/s
+6 rows imported from 1 files in 0.664 seconds (0 skipped).
+cqlsh:ass2> SELECT * FROM driver;
+
+ driver_name | current_position | email                | mobile   | password | skill
+-------------+------------------+----------------------+----------+----------+--------------------------------------
+        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f |            {'Ganz Mavag', 'Guliver'}
+        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 |                          {'Matangi'}
+         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa |                          {'Matangi'}
+       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 |                          {'Matangi'}
+       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 |               {'Guliver', 'Matangi'}
+       pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz |   213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
+
+(6 rows)
+```
+
+```
+cqlsh:ass2> COPY time_table FROM './time_table_data.txt';
+Using 7 child processes
+
+Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, longitude, stop].
+Processed: 30 rows; Rate:      47 rows/s; Avg. rate:      86 rows/s
+30 rows imported from 1 files in 0.348 seconds (0 skipped).
+cqlsh:ass2> SELECT * FROM time_table;
+
+ line_name        | service_no | time | distance | latitude | longitude | stop
+------------------+------------+------+----------+----------+-----------+--------------
+          Melling |          3 |  807 |     13.7 | -41.2036 |  174.9054 |      Melling
+          Melling |          3 |  801 |     11.4 | -41.2118 |    174.89 | Western Hutt
+          Melling |          3 |  754 |      8.3 |  -41.227 |  174.8851 |       Petone
+          Melling |          3 |  741 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          1 |  650 |     34.3 | -41.1244 |  175.0708 |   Upper Hutt
+ Hutt Valley Line |          1 |  642 |     26.5 | -41.1479 |  175.0122 | Silverstream
+ Hutt Valley Line |          1 |  634 |       19 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |          1 |  629 |     15.8 | -41.2024 |  174.9423 |       Naenae
+ Hutt Valley Line |          1 |  625 |     13.3 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |          1 |  622 |       11 | -41.2204 |  174.9081 |       Woburn
+ Hutt Valley Line |          1 |  617 |      8.3 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |          1 |  605 |        0 | -41.2865 |  174.7762 |   Wellington
+         Waikanae |          5 | 1139 |     62.8 | -40.8755 |  175.0668 |     Waikanae
+         Waikanae |          5 | 1118 |     51.3 | -40.9142 |  175.0084 |  Paraparaumu
+         Waikanae |          5 | 1059 |     33.1 | -40.9881 |   174.951 |  Paekakariki
+         Waikanae |          5 | 1042 |     15.9 | -41.1339 |  174.8406 |      Porirua
+         Waikanae |          5 | 1025 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |         11 | 2025 |     34.3 | -41.1244 |  175.0708 |   Upper Hutt
+ Hutt Valley Line |         11 | 2019 |     26.5 | -41.1479 |  175.0122 | Silverstream
+ Hutt Valley Line |         11 | 2010 |       19 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |         11 | 2001 |     15.8 | -41.2024 |  174.9423 |       Naenae
+ Hutt Valley Line |         11 | 1955 |     13.3 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |         11 | 1952 |       11 | -41.2204 |  174.9081 |       Woburn
+ Hutt Valley Line |         11 | 1947 |      8.3 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |         11 | 1935 |        0 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          2 | 1045 |     34.3 | -41.2865 |  174.7762 |   Wellington
+ Hutt Valley Line |          2 | 1033 |       26 |  -41.227 |  174.8851 |       Petone
+ Hutt Valley Line |          2 | 1025 |       21 | -41.2092 |  174.9081 |     Waterloo
+ Hutt Valley Line |          2 | 1015 |     15.3 | -41.1798 |  174.9608 |        Taita
+ Hutt Valley Line |          2 | 1000 |        0 | -41.1244 |  175.0708 |   Upper Hutt
+
+(30 rows)
+```
