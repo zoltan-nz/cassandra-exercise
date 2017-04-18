@@ -924,3 +924,166 @@ cqlsh:ass2> SELECT * FROM time_table;
 
 (30 rows)
 ```
+
+## Question 14
+(8 marks)
+
+Find nodes storing data of the driver `pavle`. Let these nodes be `node_a`, `node_b`, `node_c`, `node_d`, `node_e`, and `node_f`, where a < b < c < d < e < f.
+
+```
+$ ccm node1 nodetool getendpoints ass2 driver pavle
+
+127.0.0.1
+127.0.0.2
+127.0.0.3
+127.0.0.6
+127.0.0.7
+127.0.0.8
+```
+
+I. (4 marks)
+
+Connect to ass2 keyspace.
+
+```
+$ ccm node1 cqlsh
+Connected to multi_dc at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.10 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> USE ass2;
+cqlsh:ass2>
+```
+
+Run the statement: `select driver_name, password from driver where driver_name = 'pavle';`
+under consistency levels: 
+
+* `quorum`
+
+```
+cqlsh:ass2> CONSISTENCY QUORUM;
+Consistency level set to QUORUM.
+cqlsh:ass2> SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+```
+
+* `each_qourum`
+
+```
+cqlsh:ass2> CONSISTENCY EACH_QUORUM;
+Consistency level set to EACH_QUORUM.
+cqlsh:ass2> SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+```
+
+Run the select statement under consistency level local_quorum once for dc1 being local, and once for dc2 being local.
+
+* `local_quorum` (on node1)
+
+```
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to LOCAL_QUORUM.
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+```
+
+```
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to LOCAL_QUORUM.
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+```
+
+Our all nodes are live. We have at least 2 nodes from 3 in each datacenter. Quorum means that Cassandra returns the record after a quorum of replicas has responded from any data center. Based on the documentation `each_quorum` is not supported for reads, however our query worked and it will be clear effect when we stop nodes in the next task. In case of `local_quorum` Cassandra returns the record after a quorum of replicas in the current data center. We can avoid latency of inter-data center communication.
+
+II. (4 marks)
+
+Use `ccm` to stop `node_e` and `node_f`. Connect to `ass2` keyspace.
+
+```
+$ ccm node7 stop
+$ ccm node8 stop
+$ ccm status
+
+Cluster: 'multi_dc'
+-------------------
+node9: UP
+node8: DOWN
+node1: UP
+node3: UP
+node2: UP
+node5: UP
+node4: UP
+node7: DOWN
+node6: UP
+```
+
+Run the statement `select driver_name, password from driver where driver_name = 'pavle';` under consistency levels: `quorum`, `each_quorum`, and `local_quorum`. Run the select statement under consistency level `local_quorum` once for `dc1` being local, and once for `dc2` being local. In your answer to the question, show results of your experiments and describe briefly what you have learned.
+
+```
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to QUORUM.
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to QUORUM.
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+
+```
+We got proper respond, because at least 2 nodes live on one of the cluster. Doesn't matter to which cluster the client connects.
+
+```
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to EACH_QUORUM.
+<stdin>:1:NoHostAvailable:
+
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to EACH_QUORUM.
+<stdin>:1:NoHostAvailable:
+```
+Our request will fail, because `each_quorum` consistency expect that at least 2 nodes are active in each data center. It forces strong consistency. We should use this level in multiple datacenter clusters to strictly maintain consistency at the same level in each datacenter and if we want a read to fail when a datacenter is down and the QUORUM cannot be reached on that datacenter. Exactly this happened with us in this case.
+
+```
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to LOCAL_QUORUM.
+
+ driver_name | password
+-------------+----------
+       pavle |     pm33
+
+(1 rows)
+
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+Consistency level set to LOCAL_QUORUM.
+<stdin>:1:NoHostAvailable:
+
+```
+
+We can see, that `local_quorum` expects that we have at least 2 active nodes with replica from the connected datacenter. In the first case, when we connected to `node1` we had enough nodes active in `dc1`. In the second case, when we connected `node6` which is in `dc2`, there was not more live replica, so the quorum is not satisfied.
