@@ -601,15 +601,41 @@ Consistency level set to ONE.
 (1 rows)
 ```
 
-We can see, that our record exists on node1, node2 and node5.
+We can see, that our record exists on `node1`, `node2` and `node5`.
 
-We can check this with our restricted command:
+We can test this with our restricted command:
 
 ```
 $ ccm start; ccm node1 nodetool getendpoints ass2 driver eileen
 127.0.0.5
 127.0.0.1
 127.0.0.2
+```
+
+Update:
+
+I found a more elegant solution when I solved Question 15. Using the token function.
+ 
+```
+$ ccm start
+$ ccm node1 cqlsh -e "USE ass2; SELECT driver_name, TOKEN(driver_name) FROM driver WHERE driver_name='eileen'"
+  
+   driver_name | system.token(driver_name)
+  -------------+---------------------------
+        eileen |       2694043365177161046
+  
+  (1 rows)
+```
+
+Comparing our above token number with previously printed ring token thresholds, we can see, that `eileen`'s token is above `node4`'s threshold but smaller than `node5`. It means, that the primary node is `node5`. In the ring the following nodes, which will store replicas, are `node1` and `node2`. Again, the answer is `node1`, `node2` and `node5`.
+
+```
+Datacenter: datacenter1
+==========
+Address    Rack        Status State   Load            Owns                Token
+...
+127.0.0.4  rack1       Up     Normal  98.98 KiB       40.00%              1844674407370955161
+127.0.0.5  rack1       Up     Normal  98.98 KiB       40.00%              5534023222112865484
 ```
 
 ## Question 7 
@@ -752,6 +778,7 @@ Address    Rack        Status State   Load            Owns                Token
 127.0.0.3  r1          Up     Normal  98.97 KiB       20.00%              -1844674407370955162
 127.0.0.4  r1          Up     Normal  98.97 KiB       20.00%              1844674407370955161
 127.0.0.5  r1          Up     Normal  98.96 KiB       20.00%              5534023222112865484
+                                                                          
 
 Datacenter: dc2
 ==========
@@ -760,8 +787,9 @@ Address    Rack        Status State   Load            Owns                Token
 127.0.0.6  r1          Up     Normal  98.96 KiB       20.00%              -9223372036854775708
 127.0.0.7  r1          Up     Normal  98.97 KiB       25.00%              -4611686018427387804
 127.0.0.8  r1          Up     Normal  98.94 KiB       25.00%              100
-127.0.0.9  r1          Up     Normal  98.97 KiB       25.00%              4611686018427388004
+127.0.0.9  r1          Up     Normal  98.97 KiB       25.00%              4611686018427388004                                                                          
 ```
+
 
 ## Question 10 
 (4 marks) 
@@ -1087,3 +1115,127 @@ Consistency level set to LOCAL_QUORUM.
 ```
 
 We can see, that `local_quorum` expects that we have at least 2 active nodes with replica from the connected datacenter. In the first case, when we connected to `node1` we had enough nodes active in `dc1`. In the second case, when we connected `node6` which is in `dc2`, there was not more live replica, so the quorum is not satisfied.
+
+## Question 15 
+(10 marks) 
+
+You are asked to find those nodes of the `multi_dc` Cassandra cluster that store replicas of the `time_table` table row
+
+```
+line_name         | service_no | time | distance | latitude | longitude | stop
+------------------+------------+------+----------+----------+-----------+------------
+Hutt Valley Line  | 2          | 1045 | 34.3     | -41.2865 | 174.7762  | Wellington
+```
+
+Very soon you realized that all `ccm` and `nodetool` commands, except `ccm nodei cqlsh`, do not work. So, you are unable to use: `ccm stop`, `ccm status`, `ccm start`, `ccm nodei ring` and so on, including the command `ccm nodei nodetool getendpoints ass2 time_table <key>`.
+
+Despite that, you have devised a procedure to find the nodes requested. In your answer, describe the procedure and show how you have applied it.
+
+Hint: Luckily, you have saved the output of the ccm nodei ring command and cqlsh prompt is still working.
+
+We can use the primary key for finding the default node. Using the token function with primary keys of `time_table` we can list the token number of each row. The token number determines the default node of a record. Because our replication level is 3, the default node and the following 2 nodes will store our record. 
+
+```
+$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) as t FROM time_table"
+
+line_name        | service_no | time | t
+------------------+------------+------+----------------------
+          Melling |          3 |  807 | -7474942320664480980
+          Melling |          3 |  801 | -7474942320664480980
+          Melling |          3 |  754 | -7474942320664480980
+          Melling |          3 |  741 | -7474942320664480980
+ Hutt Valley Line |          1 |  650 | -6012480106752428297
+ Hutt Valley Line |          1 |  642 | -6012480106752428297
+ Hutt Valley Line |          1 |  634 | -6012480106752428297
+ Hutt Valley Line |          1 |  629 | -6012480106752428297
+ Hutt Valley Line |          1 |  625 | -6012480106752428297
+ Hutt Valley Line |          1 |  622 | -6012480106752428297
+ Hutt Valley Line |          1 |  617 | -6012480106752428297
+ Hutt Valley Line |          1 |  605 | -6012480106752428297
+         Waikanae |          5 | 1139 | -5905794062536720418
+         Waikanae |          5 | 1118 | -5905794062536720418
+         Waikanae |          5 | 1059 | -5905794062536720418
+         Waikanae |          5 | 1042 | -5905794062536720418
+         Waikanae |          5 | 1025 | -5905794062536720418
+ Hutt Valley Line |         11 | 2025 | -2183064056535108044
+ Hutt Valley Line |         11 | 2019 | -2183064056535108044
+ Hutt Valley Line |         11 | 2010 | -2183064056535108044
+ Hutt Valley Line |         11 | 2001 | -2183064056535108044
+ Hutt Valley Line |         11 | 1955 | -2183064056535108044
+ Hutt Valley Line |         11 | 1952 | -2183064056535108044
+ Hutt Valley Line |         11 | 1947 | -2183064056535108044
+ Hutt Valley Line |         11 | 1935 | -2183064056535108044
+ Hutt Valley Line |          2 | 1045 |  2322329569350831795
+ Hutt Valley Line |          2 | 1033 |  2322329569350831795
+ Hutt Valley Line |          2 | 1025 |  2322329569350831795
+ Hutt Valley Line |          2 | 1015 |  2322329569350831795
+ Hutt Valley Line |          2 | 1000 |  2322329569350831795
+
+(30 rows)
+```
+
+With filter for our specific data.
+
+```
+$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) as t FROM time_table WHERE line_name='Hutt Valley Line' AND service_no=2 AND time=1045"
+
+ line_name        | service_no | time | t
+------------------+------------+------+---------------------
+ Hutt Valley Line |          2 | 1045 | 2322329569350831795
+
+(1 rows)
+```
+
+Because we still have our node ring details, we can find the first node where this token belongs.
+
+```
+dc1:
+127.0.0.4  r1          Up     Normal  98.97 KiB       20.00%              1844674407370955161
+127.0.0.5  r1          Up     Normal  98.96 KiB       20.00%              5534023222112865484
+
+dc2:
+127.0.0.8  r1          Up     Normal  98.94 KiB       25.00%              100
+127.0.0.9  r1          Up     Normal  98.97 KiB       25.00%              4611686018427388004 
+```
+
+As we can see in node ring list our "Hutt Valley Line" token is smaller then the threshold of `node5` of `dc1`. So our record default node is `node5`. Replicas are the following in the ring: `node1`, `node2`
+In `dc2` token number is smaller than the threshold of `node9`, the primary node will be `node9` and replicas will be stored on `node6` and `node7`, because they are the following nodes in the ring of `dc2`. 
+
+Of course, we have to test our solution, so when we get back our tools, we can test above numbers with a "brute force" way, as we did in Question 6. Stop nodes, use `consistency one` to determine which node responds and which not.
+
+```
+$ ccm stop
+$ ccm node9 start
+$ ccm status
+Cluster: 'multi_dc'
+-------------------
+node9: UP
+node8: DOWN
+node1: DOWN
+node3: DOWN
+node2: DOWN
+node5: DOWN
+node4: DOWN
+node7: DOWN
+node6: DOWN
+$ ccm node9 cqlsh -e "CONSISTENCY LOCAL_ONE; SELECT * FROM ass2.time_table WHERE line_name='Hutt Valley Line' AND service_no=2 AND time=1045 ;"
+  Consistency level set to LOCAL_ONE.
+  
+   line_name        | service_no | time | distance | latitude | longitude | stop
+  ------------------+------------+------+----------+----------+-----------+------------
+   Hutt Valley Line |          2 | 1045 |     34.3 | -41.2865 |  174.7762 | Wellington
+  
+  (1 rows)
+```
+It shows, that `node9` stores our requested record.
+Repeating the above steps for other nodes, I got respond from `node6` and `node7`, but not from `node8`.
+And testing `dc1`, I got respond from `node1`, `node2` and `node5`, but not from `node3` and `node4`.
+
+So our token solution was right. (Automated bash script is saved in `q15-brute-force.sh`)
+
+
+
+
+
+
+
