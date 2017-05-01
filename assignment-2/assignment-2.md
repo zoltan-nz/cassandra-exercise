@@ -193,7 +193,8 @@ a) (3marks) Connect to `cqlsh` prompt and create a keyspace with the name `ass2`
 
 ```
 $ ccm node1 cqlsh
-cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 3 };
+cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 with replication = { 'class' : 'SimpleStrategy', 
+'replication_factor' : 3 };
 ```
 
 b) (5marks) 
@@ -246,10 +247,12 @@ time_table  data_point  driver  vehicle
 ```
 
 ```
-cqlsh> COPY ass2.time_table (line_name, service_no, time, distance, latitude, longitude, stop) FROM './time_table_data.txt';
+cqlsh> COPY ass2.time_table (line_name, service_no, time, distance, latitude, longitude, stop) 
+FROM './time_table_data.txt';
 Using 7 child processes
 
-Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, longitude, stop].
+Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, 
+longitude, stop].
 Processed: 30 rows; Rate:      44 rows/s; Avg. rate:      66 rows/s
 30 rows imported from 1 files in 0.458 seconds (0 skipped).
 cqlsh> SELECT * FROM ass2.time_table;
@@ -294,18 +297,19 @@ cqlsh> SELECT * FROM ass2.time_table;
 cqlsh> COPY ass2.data_point FROM './data_point_data.txt';
 Using 7 child processes
 
-Starting copy of ass2.data_point with columns [line_name, service_no, date, sequence, latitude, longitude, speed].
+Starting copy of ass2.data_point with columns [line_name, service_no, date, sequence, latitude, 
+longitude, speed].
 Processed: 5 rows; Rate:       8 rows/s; Avg. rate:      11 rows/s
 5 rows imported from 1 files in 0.437 seconds (0 skipped).
 cqlsh> SELECT * FROM ass2.data_point;
 
- line_name       | service_no | date     | sequence                        | latitude | longitude | speed
------------------+------------+----------+---------------------------------+----------+-----------+-------
- Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:07:40.000000+0000 | -41.2012 |       175 |  70.1
- Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:02:10.000000+0000 | -41.1255 |    175.07 |  40.5
- Hutt Valey Line |          2 | 20160326 | 2016-03-24 21:27:10.000000+0000 | -41.2262 |    174.77 |  29.1
- Hutt Valey Line |          2 | 20150322 | 2015-03-21 21:44:10.000000+0000 | -41.2862 |  174.7759 |   9.1
- Hutt Valey Line |          2 | 20160322 | 2016-03-21 21:37:50.000000+0000 | -41.2272 |    174.77 |  29.1
+ line_name       | service_no | date     | sequence                | latitude | longitude | speed
+-----------------+------------+----------+-------------------------+----------+-----------+-------
+ Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:07:40.000 | -41.2012 |       175 |  70.1
+ Hutt Valey Line |          2 | 20160326 | 2016-03-25 21:02:10.000 | -41.1255 |    175.07 |  40.5
+ Hutt Valey Line |          2 | 20160326 | 2016-03-24 21:27:10.000 | -41.2262 |    174.77 |  29.1
+ Hutt Valey Line |          2 | 20150322 | 2015-03-21 21:44:10.000 | -41.2862 |  174.7759 |   9.1
+ Hutt Valey Line |          2 | 20160322 | 2016-03-21 21:37:50.000 | -41.2272 |    174.77 |  29.1
 
 (5 rows)
 ```
@@ -314,18 +318,19 @@ cqlsh> SELECT * FROM ass2.data_point;
 cqlsh> COPY ass2.driver FROM './driver_data.txt';
 Using 7 child processes
 
-Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, password, skill].
+Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, password, 
+skill].
 Processed: 6 rows; Rate:      10 rows/s; Avg. rate:      14 rows/s
 6 rows imported from 1 files in 0.430 seconds (0 skipped).
 cqlsh> SELECT * FROM ass2.driver;
 
  driver_name | current_position | email                | mobile   | password | skill
 -------------+------------------+----------------------+----------+----------+--------------------------------------
-        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f |            {'Ganz Mavag', 'Guliver'}
-        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 |                          {'Matangi'}
-         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa |                          {'Matangi'}
-       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 |                          {'Matangi'}
-       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 |               {'Guliver', 'Matangi'}
+        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f | {'Ganz Mavag', 'Guliver'}
+        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 | {'Matangi'}
+         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa | {'Matangi'}
+       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 | {'Matangi'}
+       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 | {'Guliver', 'Matangi'}
        pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz |   213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
 
 (6 rows)
@@ -488,7 +493,9 @@ $ ccm node1 cqlsh -e "use ass2; select * from driver where driver_name = 'eileen
   
   (0 rows)
 
-$ ccm node1 cqlsh -e "INSERT INTO ass2.driver (driver_name, current_position, email, mobile, password, skill) VALUES ('eileen', 'Wellington', 'eileen@ecs.vuw.ac.nz', 555444, 'abcd123', {'Guliver', 'Matangi'}) IF NOT EXISTS;"
+$ ccm node1 cqlsh -e "INSERT INTO ass2.driver (driver_name, current_position, email, mobile, 
+password, skill) VALUES ('eileen', 'Wellington', 'eileen@ecs.vuw.ac.nz', 555444, 'abcd123', 
+{'Guliver', 'Matangi'}) IF NOT EXISTS;"
 
  [applied]
 -----------
@@ -522,7 +529,8 @@ done
 Or we can run manually this one line for each node:
 
 ```
-$ ccm switch single_dc; ccm stop; ccm node1 start; ccm status; ccm node1 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+$ ccm switch single_dc; ccm stop; ccm node1 start; ccm status; ccm node1 cqlsh -e "use ass2; 
+consistency one; select * from driver where driver_name='eileen';"
 
 Cluster: 'single_dc'
 --------------------
@@ -538,7 +546,8 @@ node4: DOWN
 
 (1 rows)
 
-$ ccm switch single_dc; ccm stop; ccm node2 start; ccm status; ccm node2 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+$ ccm switch single_dc; ccm stop; ccm node2 start; ccm status; ccm node2 cqlsh -e "use ass2; 
+consistency one; select * from driver where driver_name='eileen';"
 
 Cluster: 'single_dc'
 --------------------
@@ -556,7 +565,8 @@ Consistency level set to ONE.
 
 (1 rows)
 
-$ ccm switch single_dc; ccm stop; ccm node3 start; ccm status; ccm node3 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+$ ccm switch single_dc; ccm stop; ccm node3 start; ccm status; ccm node3 cqlsh -e "use ass2; 
+consistency one; select * from driver where driver_name='eileen';"
 
 Cluster: 'single_dc'
 --------------------
@@ -570,7 +580,8 @@ Consistency level set to ONE.
 
 NoHostAvailable:
 
-$ ccm switch single_dc; ccm stop; ccm node4 start; ccm status; ccm node4 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+$ ccm switch single_dc; ccm stop; ccm node4 start; ccm status; ccm node4 cqlsh -e "use ass2; 
+consistency one; select * from driver where driver_name='eileen';"
 
 Cluster: 'single_dc'
 --------------------
@@ -584,7 +595,8 @@ Consistency level set to ONE.
 
 NoHostAvailable:
 
-$ ccm switch single_dc; ccm stop; ccm node5 start; ccm status; ccm node5 cqlsh -e "use ass2; consistency one; select * from driver where driver_name='eileen';"
+$ ccm switch single_dc; ccm stop; ccm node5 start; ccm status; ccm node5 cqlsh -e "use ass2; 
+consistency one; select * from driver where driver_name='eileen';"
 
 Cluster: 'single_dc'
 --------------------
@@ -620,7 +632,8 @@ I found a more elegant solution when I solved Question 15. Using the token funct
  
 ```
 $ ccm start
-$ ccm node1 cqlsh -e "USE ass2; SELECT driver_name, TOKEN(driver_name) FROM driver WHERE driver_name='eileen'"
+$ ccm node1 cqlsh -e "USE ass2; SELECT driver_name, TOKEN(driver_name) FROM driver WHERE 
+driver_name='eileen'"
   
    driver_name | system.token(driver_name)
   -------------+---------------------------
@@ -711,7 +724,8 @@ However, if we don't change our consistency level than our experiment will fail.
 We have to use the following command to insert our data.
 
 ```
-$ ccm node3 cqlsh -e "use ass2; consistency quorum; insert into driver (driver_name, password) values ('james', '7007');"
+$ ccm node3 cqlsh -e "use ass2; consistency quorum; insert into driver (driver_name, password) 
+values ('james', '7007');"
 ```
 
 Simulate `node1`, `node5` are down and `node4` is back.
@@ -837,7 +851,8 @@ Both list the rack numbers also. In our case, we use only one-one rack.
 Create a keyspace with the name `ass2` having network topology replication strategy and a replication factor of 3 for both `dc1` and `dc2` datacenters. In your answer, show your keyspace declaration.
 
 ```
-cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 3, 'dc2': 3 };
+cqlsh> CREATE KEYSPACE IF NOT EXISTS ass2 WITH replication = {'class': 'NetworkTopologyStrategy', 
+'dc1': 3, 'dc2': 3 };
 ```
 
 ## Question 13
@@ -893,18 +908,19 @@ cqlsh> USE ass2;
 cqlsh:ass2> COPY driver FROM './driver_data.txt';
 Using 7 child processes
 
-Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, password, skill].
+Starting copy of ass2.driver with columns [driver_name, current_position, email, mobile, 
+password, skill].
 Processed: 6 rows; Rate:       6 rows/s; Avg. rate:       9 rows/s
 6 rows imported from 1 files in 0.664 seconds (0 skipped).
 cqlsh:ass2> SELECT * FROM driver;
 
  driver_name | current_position | email                | mobile   | password | skill
 -------------+------------------+----------------------+----------+----------+--------------------------------------
-        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f |            {'Ganz Mavag', 'Guliver'}
-        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 |                          {'Matangi'}
-         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa |                          {'Matangi'}
-       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 |                          {'Matangi'}
-       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 |               {'Guliver', 'Matangi'}
+        fred |            Taita |   fred@ecs.vuw.ac.nz |  2799797 |     f00f | {'Ganz Mavag', 'Guliver'}
+        jane |         Waikanae |   jane@ecs.vuw.ac.nz |  2131131 |     jj77 | {'Matangi'}
+         ann |    not available |    ann@ecs.vuw.ac.nz | 21998877 |     aaaa | {'Matangi'}
+       milan |       Upper Hutt |  milan@ecs.vuw.ac.nz |   211111 |     mm77 | {'Matangi'}
+       pondy |       Wellington |  pondy@ecs.vuw.ac.nz |   214455 |     pd66 | {'Guliver', 'Matangi'}
        pavle |       Upper Hutt | pmogin@ecs.vuw.ac.nz |   213344 |     pm33 | {'Ganz Mavag', 'Guliver', 'Matangi'}
 
 (6 rows)
@@ -914,7 +930,8 @@ cqlsh:ass2> SELECT * FROM driver;
 cqlsh:ass2> COPY time_table FROM './time_table_data.txt';
 Using 7 child processes
 
-Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, longitude, stop].
+Starting copy of ass2.time_table with columns [line_name, service_no, time, distance, latitude, 
+longitude, stop].
 Processed: 30 rows; Rate:      47 rows/s; Avg. rate:      86 rows/s
 30 rows imported from 1 files in 0.348 seconds (0 skipped).
 cqlsh:ass2> SELECT * FROM time_table;
@@ -1020,7 +1037,8 @@ Run the select statement under consistency level local_quorum once for dc1 being
 * `local_quorum` (on node1)
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM 
+driver WHERE driver_name = 'pavle';"
 Consistency level set to LOCAL_QUORUM.
 
  driver_name | password
@@ -1031,7 +1049,8 @@ Consistency level set to LOCAL_QUORUM.
 ```
 
 ```
-$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM 
+driver WHERE driver_name = 'pavle';"
 Consistency level set to LOCAL_QUORUM.
 
  driver_name | password
@@ -1068,7 +1087,8 @@ node6: UP
 Run the statement `select driver_name, password from driver where driver_name = 'pavle';` under consistency levels: `quorum`, `each_quorum`, and `local_quorum`. Run the select statement under consistency level `local_quorum` once for `dc1` being local, and once for `dc2` being local. In your answer to the question, show results of your experiments and describe briefly what you have learned.
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to QUORUM.
 
  driver_name | password
@@ -1077,7 +1097,8 @@ Consistency level set to QUORUM.
 
 (1 rows)
 
-$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to QUORUM.
 
  driver_name | password
@@ -1090,18 +1111,21 @@ Consistency level set to QUORUM.
 We got proper respond, because at least 2 nodes live on one of the cluster. Doesn't matter to which cluster the client connects.
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to EACH_QUORUM.
 <stdin>:1:NoHostAvailable:
 
-$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY each_quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to EACH_QUORUM.
 <stdin>:1:NoHostAvailable:
 ```
 Our request will fail, because `each_quorum` consistency expect that at least 2 nodes are active in each data center. It forces strong consistency. We should use this level in multiple datacenter clusters to strictly maintain consistency at the same level in each datacenter and if we want a read to fail when a datacenter is down and the QUORUM cannot be reached on that datacenter. Exactly this happened with us in this case.
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node1 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to LOCAL_QUORUM.
 
  driver_name | password
@@ -1110,7 +1134,8 @@ Consistency level set to LOCAL_QUORUM.
 
 (1 rows)
 
-$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver WHERE driver_name = 'pavle';"
+$ ccm node6 cqlsh -e "USE ass2; CONSISTENCY local_quorum; SELECT driver_name, password FROM driver 
+WHERE driver_name = 'pavle';"
 Consistency level set to LOCAL_QUORUM.
 <stdin>:1:NoHostAvailable:
 
@@ -1138,7 +1163,8 @@ Hint: Luckily, you have saved the output of the ccm nodei ring command and cqlsh
 We can use the primary key for finding the default node. Using the token function with primary keys of `time_table` we can list the token number of each row. The token number determines the default node of a record. Because our replication level is 3, the default node and the following 2 nodes will store our record. 
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) as t FROM time_table"
+$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) 
+as t FROM time_table"
 
 line_name        | service_no | time | t
 ------------------+------------+------+----------------------
@@ -1179,7 +1205,8 @@ line_name        | service_no | time | t
 With filter for our specific data.
 
 ```
-$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) as t FROM time_table WHERE line_name='Hutt Valley Line' AND service_no=2 AND time=1045"
+$ ccm node1 cqlsh -e "USE ass2; SELECT line_name, service_no, time, token(line_name, service_no) 
+as t FROM time_table WHERE line_name='Hutt Valley Line' AND service_no=2 AND time=1045"
 
  line_name        | service_no | time | t
 ------------------+------------+------+---------------------
@@ -1220,7 +1247,8 @@ node5: DOWN
 node4: DOWN
 node7: DOWN
 node6: DOWN
-$ ccm node9 cqlsh -e "CONSISTENCY LOCAL_ONE; SELECT * FROM ass2.time_table WHERE line_name='Hutt Valley Line' AND service_no=2 AND time=1045 ;"
+$ ccm node9 cqlsh -e "CONSISTENCY LOCAL_ONE; SELECT * FROM ass2.time_table WHERE line_name='Hutt 
+Valley Line' AND service_no=2 AND time=1045 ;"
   Consistency level set to LOCAL_ONE.
   
    line_name        | service_no | time | distance | latitude | longitude | stop
